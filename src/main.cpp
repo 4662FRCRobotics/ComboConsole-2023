@@ -20,12 +20,28 @@ enum joystickAxis {
 };
 
 #define JOYSTICK_COUNT 2
-#define KEYBOARD_IX 2 // not used 
+#define kTELEOP_IX 0
+#define kAUTO_IX 1
+#define kKEYBOARD_IX 2 // not used in this version
+
+// joystick layout
+uint8_t kBUTTON_CNT[JOYSTICK_COUNT] = {4, 12};
+uint8_t kPOV_CNT[JOYSTICK_COUNT] = {1, 2};
+boolean kIS_X_AXIS[JOYSTICK_COUNT] = {true, false};
+boolean kIS_Y_AXIS[JOYSTICK_COUNT] = {true, false};
+boolean kIS_Z_AXIS[JOYSTICK_COUNT] = {false, false};
 
 Joystick_ Joystick[JOYSTICK_COUNT] = {
-  Joystick_(0x04, JOYSTICK_TYPE_JOYSTICK,  4, 1, true, true, false, false, false, false, false, false, false, false, false),
-  Joystick_(0x03, JOYSTICK_TYPE_JOYSTICK,  12, 2, false, false, false, false, false, false, false, false, false, false, false)
-
+  Joystick_(0x04, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kTELEOP_IX], kPOV_CNT[kTELEOP_IX], 
+        kIS_X_AXIS[kTELEOP_IX], kIS_Y_AXIS[kTELEOP_IX], kIS_Z_AXIS[kTELEOP_IX], 
+        false, false, false,
+        false, false,
+        false, false, false),
+  Joystick_(0x03, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kAUTO_IX], kPOV_CNT[kAUTO_IX], 
+        kIS_X_AXIS[kAUTO_IX], kIS_Y_AXIS[kAUTO_IX], kIS_Z_AXIS[kAUTO_IX], 
+        false, false, false,
+        false, false,
+        false, false, false)  
 };
 
 // Number of complete scans for which a key transition is ignored 
@@ -76,10 +92,10 @@ static const uint8_t istickBtn[NUM_COLUMNS][NUM_ROWS] =
 
 static const uint8_t istickNbr[NUM_COLUMNS][NUM_ROWS] = 
   {
-    {1, 1, 1, 1},
-    {1, 1, 1, 1},
-    {1, 1, 1, 1},
-    {0, 0, 0, 0}
+    {kAUTO_IX, kAUTO_IX, kAUTO_IX, kAUTO_IX},
+    {kAUTO_IX, kAUTO_IX, kAUTO_IX, kAUTO_IX},
+    {kAUTO_IX, kAUTO_IX, kAUTO_IX, kAUTO_IX},
+    {kTELEOP_IX, kTELEOP_IX, kTELEOP_IX, kTELEOP_IX}
   };
 
 // These are the states the key can be in (see state diagram above).
@@ -102,7 +118,7 @@ static KeyState keystates[NUM_COLUMNS][NUM_ROWS];
 static uint16_t lockout[NUM_COLUMNS][NUM_ROWS];
 
 
-#define ANALOG_CNT 3
+#define ANALOG_CNT 2
 
 const static uint8_t axisIn[ANALOG_CNT] =
 {
@@ -118,8 +134,8 @@ const static joystickAxis axisMap[ANALOG_CNT] =
 
 const static uint8_t axisStick[ANALOG_CNT] =
 {
-  0,
-  0
+  kTELEOP_IX,
+  kTELEOP_IX
 };
 
 #define ROTARY_SW_CNT 3
@@ -161,9 +177,9 @@ const static uint8_t rotSwMap[ROTARY_SW_CNT] =
 
 const static uint8_t rotSwStick[ROTARY_SW_CNT] =
 {
-  1,
-  1,
-  0
+  kAUTO_IX,
+  kAUTO_IX,
+  kTELEOP_IX
 };
 
 
@@ -203,18 +219,21 @@ void setup() {
  * is 1, and a key release if it is 0.
  */
 static void keytest_emit (uint8_t button, uint8_t stickNbr, BOOL pressed) {
-  if (stickNbr == KEYBOARD_IX) {
+  if (stickNbr == kKEYBOARD_IX) {
     if (pressed) {
       Keyboard.press(' ');
     } else {
       Keyboard.release(' ');
     }
   } else { 
-    if (pressed) {
-      Joystick[stickNbr].pressButton(button);
-    }
-    else {
-      Joystick[stickNbr].releaseButton(button);
+    // if the button number is out of bounds, ignore it
+    if (kBUTTON_CNT[stickNbr] > button) {
+      if (pressed) {
+        Joystick[stickNbr].pressButton(button);
+      }
+      else {
+        Joystick[stickNbr].releaseButton(button);
+      }
     }
   }
 }
@@ -271,20 +290,26 @@ static void keytest_do_row_col (uint8_t row, uint8_t col, BOOL pressed, BOOL tim
 static void assignPOV (uint8_t rotSwIx) {
   uint16_t rotSwVal = analogRead(rotSwIn[rotSwIx]);
   uint16_t POVSwHeading = (((rotSwVal * (rotSwContacts[rotSwIx] - 1)) + rotSwMidpoint[rotSwIx]) / 1023) * 45;
-  Joystick[rotSwStick[rotSwIx]].setHatSwitch(rotSwMap[rotSwIx], POVSwHeading);
+  // add test for joystick pov count
+  if (kPOV_CNT[rotSwStick[rotSwIx]] > rotSwMap[rotSwIx]) {
+    Joystick[rotSwStick[rotSwIx]].setHatSwitch(rotSwMap[rotSwIx], POVSwHeading);
+  }
 }
 
 static void assignAxis (uint8_t analogIn) {
   int axisValue = analogRead(axisIn[analogIn]);
   switch (axisMap[analogIn]) {
     case X_AXIS:
-      Joystick[axisStick[analogIn]].setXAxis(axisValue);
+      if (kIS_X_AXIS[axisStick[analogIn]])
+       Joystick[axisStick[analogIn]].setXAxis(axisValue);
       break;
     case Y_AXIS:
+      if (kIS_Y_AXIS[axisStick[analogIn]])
       Joystick[axisStick[analogIn]].setYAxis(axisValue);
       break;
     case Z_AXIS:
-      Joystick[axisStick[analogIn]].setZAxis(axisValue);
+      if (kIS_Z_AXIS[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setZAxis(axisValue);
       break;
     case RX_AXIS:
       Joystick[axisStick[analogIn]].setRxAxis(axisValue);    
