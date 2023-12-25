@@ -30,18 +30,26 @@ uint8_t kPOV_CNT[JOYSTICK_COUNT] = {1, 2};
 boolean kIS_X_AXIS[JOYSTICK_COUNT] = {true, false};
 boolean kIS_Y_AXIS[JOYSTICK_COUNT] = {true, false};
 boolean kIS_Z_AXIS[JOYSTICK_COUNT] = {false, false};
+boolean kIS_X_ROTATION[JOYSTICK_COUNT] = {false, false};
+boolean kIS_Y_ROTATION[JOYSTICK_COUNT] = {false, false};
+boolean kIS_Z_ROTATION[JOYSTICK_COUNT] = {false, false};
+boolean kIS_RUDDER[JOYSTICK_COUNT] = {false, false};
+boolean kIS_THROTTLE[JOYSTICK_COUNT] = {false, false};
+boolean kIS_ACCELRATOR[JOYSTICK_COUNT] = {false, false};
+boolean kIS_BRAKE[JOYSTICK_COUNT] = {false, false};
+boolean kIS_STEERING[JOYSTICK_COUNT] = {false, false};
 
 Joystick_ Joystick[JOYSTICK_COUNT] = {
   Joystick_(0x04, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kTELEOP_IX], kPOV_CNT[kTELEOP_IX], 
         kIS_X_AXIS[kTELEOP_IX], kIS_Y_AXIS[kTELEOP_IX], kIS_Z_AXIS[kTELEOP_IX], 
-        false, false, false,
-        false, false,
-        false, false, false),
+        kIS_X_ROTATION[kTELEOP_IX], kIS_Y_ROTATION[kTELEOP_IX], kIS_Z_ROTATION[kTELEOP_IX],
+        kIS_RUDDER[kTELEOP_IX], kIS_THROTTLE[kTELEOP_IX],
+        kIS_ACCELRATOR[kTELEOP_IX], kIS_BRAKE[kTELEOP_IX], kIS_STEERING[kTELEOP_IX]),
   Joystick_(0x03, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kAUTO_IX], kPOV_CNT[kAUTO_IX], 
         kIS_X_AXIS[kAUTO_IX], kIS_Y_AXIS[kAUTO_IX], kIS_Z_AXIS[kAUTO_IX], 
-        false, false, false,
-        false, false,
-        false, false, false)  
+        kIS_X_ROTATION[kAUTO_IX], kIS_Y_ROTATION[kAUTO_IX], kIS_Z_ROTATION[kAUTO_IX],
+        kIS_RUDDER[kAUTO_IX], kIS_THROTTLE[kAUTO_IX],
+        kIS_ACCELRATOR[kAUTO_IX], kIS_BRAKE[kAUTO_IX], kIS_STEERING[kAUTO_IX]) 
 };
 
 // Number of complete scans for which a key transition is ignored 
@@ -312,28 +320,36 @@ static void assignAxis (uint8_t analogIn) {
         Joystick[axisStick[analogIn]].setZAxis(axisValue);
       break;
     case RX_AXIS:
-      Joystick[axisStick[analogIn]].setRxAxis(axisValue);    
+      if (kIS_X_ROTATION[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setRxAxis(axisValue);    
       break;
     case RY_AXIS:
-      Joystick[axisStick[analogIn]].setRyAxis(axisValue);
+      if (kIS_Y_ROTATION[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setRyAxis(axisValue);
       break; 
     case RZ_AXIS:
-      Joystick[axisStick[analogIn]].setRzAxis(axisValue);
+      if (kIS_Z_ROTATION[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setRzAxis(axisValue);
       break;
     case RUDDER:
-      Joystick[axisStick[analogIn]].setRudder(axisValue);
+      if (kIS_RUDDER[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setRudder(axisValue);
       break;
     case THROTTLE:
-      Joystick[axisStick[analogIn]].setThrottle(axisValue);
+      if (kIS_THROTTLE[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setThrottle(axisValue);
       break;
     case ACCELERATOR:
-      Joystick[axisStick[analogIn]].setAccelerator(axisValue);
+      if (kIS_ACCELRATOR[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setAccelerator(axisValue);
       break;
     case BRAKE:
-      Joystick[axisStick[analogIn]].setBrake(axisValue);
+      if (kIS_BRAKE[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setBrake(axisValue);
       break;
     case STEERING:
-      Joystick[axisStick[analogIn]].setSteering(axisValue);
+      if (kIS_STEERING[axisStick[analogIn]])
+        Joystick[axisStick[analogIn]].setSteering(axisValue);
       break;
     default:
       break;
