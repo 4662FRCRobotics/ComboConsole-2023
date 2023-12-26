@@ -29,7 +29,7 @@ uint8_t kBUTTON_CNT[JOYSTICK_COUNT] = {4, 12};
 uint8_t kPOV_CNT[JOYSTICK_COUNT] = {1, 2};
 boolean kIS_X_AXIS[JOYSTICK_COUNT] = {true, false};
 boolean kIS_Y_AXIS[JOYSTICK_COUNT] = {true, false};
-boolean kIS_Z_AXIS[JOYSTICK_COUNT] = {false, false};
+boolean kIS_Z_AXIS[JOYSTICK_COUNT] = {true, false};
 boolean kIS_X_ROTATION[JOYSTICK_COUNT] = {false, false};
 boolean kIS_Y_ROTATION[JOYSTICK_COUNT] = {false, false};
 boolean kIS_Z_ROTATION[JOYSTICK_COUNT] = {false, false};
@@ -40,12 +40,12 @@ boolean kIS_BRAKE[JOYSTICK_COUNT] = {false, false};
 boolean kIS_STEERING[JOYSTICK_COUNT] = {false, false};
 
 Joystick_ Joystick[JOYSTICK_COUNT] = {
-  Joystick_(0x04, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kTELEOP_IX], kPOV_CNT[kTELEOP_IX], 
+  Joystick_(0x03, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kTELEOP_IX], kPOV_CNT[kTELEOP_IX], 
         kIS_X_AXIS[kTELEOP_IX], kIS_Y_AXIS[kTELEOP_IX], kIS_Z_AXIS[kTELEOP_IX], 
         kIS_X_ROTATION[kTELEOP_IX], kIS_Y_ROTATION[kTELEOP_IX], kIS_Z_ROTATION[kTELEOP_IX],
         kIS_RUDDER[kTELEOP_IX], kIS_THROTTLE[kTELEOP_IX],
         kIS_ACCELRATOR[kTELEOP_IX], kIS_BRAKE[kTELEOP_IX], kIS_STEERING[kTELEOP_IX]),
-  Joystick_(0x03, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kAUTO_IX], kPOV_CNT[kAUTO_IX], 
+  Joystick_(0x04, JOYSTICK_TYPE_JOYSTICK,  kBUTTON_CNT[kAUTO_IX], kPOV_CNT[kAUTO_IX], 
         kIS_X_AXIS[kAUTO_IX], kIS_Y_AXIS[kAUTO_IX], kIS_Z_AXIS[kAUTO_IX], 
         kIS_X_ROTATION[kAUTO_IX], kIS_Y_ROTATION[kAUTO_IX], kIS_Z_ROTATION[kAUTO_IX],
         kIS_RUDDER[kAUTO_IX], kIS_THROTTLE[kAUTO_IX],
@@ -126,22 +126,25 @@ static KeyState keystates[NUM_COLUMNS][NUM_ROWS];
 static uint16_t lockout[NUM_COLUMNS][NUM_ROWS];
 
 
-#define ANALOG_CNT 2
+#define ANALOG_CNT 3
 
 const static uint8_t axisIn[ANALOG_CNT] =
 {
   A2,
-  A3
+  A3,
+  A10 
 };
 
 const static joystickAxis axisMap[ANALOG_CNT] =
 {
   X_AXIS,
-  Y_AXIS
+  Y_AXIS,
+  Z_AXIS
 };
 
 const static uint8_t axisStick[ANALOG_CNT] =
 {
+  kTELEOP_IX,
   kTELEOP_IX,
   kTELEOP_IX
 };
@@ -152,7 +155,7 @@ const static uint8_t rotSwIn[ROTARY_SW_CNT] =
 {
   A0,
   A1,
-  A10
+  A7
 };
 
 const static uint8_t rotSwContacts[ROTARY_SW_CNT] =
